@@ -1,0 +1,64 @@
+<html>
+<head>
+    <title>Logic</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="puzzlemanager.js"></script>
+    <script src="cell.js"></script>
+    <script>
+        const puzzleManager = new PuzzleManager();
+        const grid = new Puzzle();
+        const currentCell = { x : -1, y : -1 };
+        $(document).ready(function() {
+            $('#grid-container').on('mousedown', 'td', function() {
+                grid.leftMouseDown($(this));
+            });
+            $('#grid-container').on('mousemove', 'td', function() {
+                grid.mouseMove($(this));
+            });
+            $('#grid-container').on('mouseup', 'td', function() {
+                grid.mouseUp($(this));
+            });
+
+            $('#start-import').click(importPuzzle);
+
+            function importPuzzle() {
+                const puz = new Puzzle();
+                puz.import($('#import-text').val());
+                const title = $('#import-title').val().trim();
+                if (title) {
+                    puzzleManager.storePuzzle(title, puz);
+                }
+                getPuzzleList();
+            }
+
+            function getPuzzleList() {
+                const container = $('#available-puzzle-list-container .body').html('');
+                for (const puzzle of puzzleManager.puzzles) {
+                    $('#available-puzzle-list-container .body').append('<li>' + puzzle.title + '</li>');
+                }
+            }
+
+            function loadPuzzle(title) {
+                if (puzzleManager.puzzles[title]) {
+                    const gridHTML = puzzleManager.puzzles[title].render();
+                    $('#grid-container').html(gridHTML);
+                }
+            }
+        });
+    </script>
+    <link rel="stylesheet" href="grid.css">
+</head>
+<body>
+    <div id="available-puzzle-list-container">
+        <div class="title">Available Puzzles</div>
+        <ol class="body"></ol>
+    </div>
+    <div id="grid-container" class="grid-container">
+
+    </div>
+    <input id="import-title" type="text" />
+    <textarea id="import-text" rows="20" cols="40"></textarea><br />
+    <button id="start-import" type="button">Import</button>
+</body>
+</html>
