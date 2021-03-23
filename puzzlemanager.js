@@ -30,7 +30,9 @@ class PuzzleManager {
      */
     retrieveAllPuzzles() {
         const puzzleString = window.localStorage.getItem('Puzzles');
-        this.puzzles = JSON.parse(puzzleString);
+        if (typeof puzzleString == "string" && puzzleString.length > 0) {
+            this.puzzles = JSON.parse(puzzleString);
+        }
     }
 
     /**

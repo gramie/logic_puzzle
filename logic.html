@@ -34,8 +34,8 @@
 
             function getPuzzleList() {
                 const container = $('#available-puzzle-list-container .body').html('');
-                for (const puzzle of puzzleManager.puzzles) {
-                    $('#available-puzzle-list-container .body').append('<li>' + puzzle.title + '</li>');
+                for (const title of Object.keys(puzzleManager.puzzles)) {
+                    $('#available-puzzle-list-container .body').append('<li>' + title + '</li>');
                 }
             }
 

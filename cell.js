@@ -14,6 +14,7 @@ class Cell {
 
 class Puzzle {
     constructor() {
+        this.title = '';
         this.cells = [];
         this.rowNumbers = [];
         this.maxRowNumbers;
@@ -199,6 +200,7 @@ class Puzzle {
 
     unserialize(puzzleData) {
         const puzzleVariables = JSON.parse(puzzleData);
+        this.title = puzzleVariables.title;
         this.rowNumbers = puzzleVariables.rowNumbers;
         this.height = puzzleVariables.rowNumbers.length;
         this.colNumbers = puzzleVariables.ColNumbers;
@@ -209,6 +211,7 @@ class Puzzle {
 
     serialize() {
         const puzzle = {
+            title : this.title,
             width : this.width,
             height : this.height,
             rowNumbers : this.rowNumbers,
