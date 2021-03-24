@@ -28,7 +28,9 @@ class Puzzle {
         this.currentPaintColour = null;
     }
 
-    import(puzzleText) {
+    import(title, puzzleText) {
+        this.title = title;
+        
         const lines = puzzleText.split("\n");
         const rowNumbers = [];
         const colNumbers = [];

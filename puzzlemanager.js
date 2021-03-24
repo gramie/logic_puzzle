@@ -22,7 +22,11 @@ class PuzzleManager {
      * @param {Array} puzzles 
      */
     saveAllPuzzles() {
-        window.localStorage.setItem('Puzzles', JSON.stringify(this.puzzles));
+        const allPuzzles = [];
+        for (const key of Object.keys(this.puzzles)) {
+            allPuzzles.push(this.puzzles[key]);
+        }
+        window.localStorage.setItem('Puzzles', JSON.stringify(allPuzzles));
     }
 
     /**
@@ -31,7 +35,15 @@ class PuzzleManager {
     retrieveAllPuzzles() {
         const puzzleString = window.localStorage.getItem('Puzzles');
         if (typeof puzzleString == "string" && puzzleString.length > 0) {
-            this.puzzles = JSON.parse(puzzleString);
+            // get an array of strings
+            const puzzleItems = JSON.parse(puzzleString);
+            for (const item of puzzleItems) {
+                if (item) {
+                    const puz = new Puzzle();
+                    puz.unserialize(item);
+                    this.puzzles[item.title] = puz;
+                }
+            }
         }
     }
 

@@ -24,9 +24,9 @@
 
             function importPuzzle() {
                 const puz = new Puzzle();
-                puz.import($('#import-text').val());
                 const title = $('#import-title').val().trim();
                 if (title) {
+                    puz.import(title, $('#import-text').val());
                     puzzleManager.storePuzzle(title, puz);
                 }
                 getPuzzleList();
