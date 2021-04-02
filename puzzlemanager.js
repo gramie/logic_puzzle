@@ -6,9 +6,9 @@ class PuzzleManager {
 
     /**
      * Save a single puzzle
-     * 
-     * @param {string} title 
-     * @param {Object} puzzle 
+     *
+     * @param {string} title
+     * @param {Object} puzzle
      */
     storePuzzle(title, puzzle) {
         if (title) {
@@ -19,7 +19,7 @@ class PuzzleManager {
 
     /**
      * Save all puzzles into local storage
-     * @param {Array} puzzles 
+     * @param {Array} puzzles
      */
     saveAllPuzzles() {
         const allPuzzles = [];
@@ -49,8 +49,8 @@ class PuzzleManager {
 
     /**
      * Get a single puzzle
-     * @param {string} title 
-     * @returns 
+     * @param {string} title
+     * @returns
      */
     getPuzzle(title) {
         let result = null;
@@ -61,5 +61,11 @@ class PuzzleManager {
         }
 
         return result;
+    }
+
+    deletePuzzle(title) {
+        if (this.puzzles[title]) {
+            delete(this.puzzles[title]);
+        }
     }
 }

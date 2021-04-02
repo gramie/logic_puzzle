@@ -30,7 +30,7 @@ class Puzzle {
 
     import(title, puzzleText) {
         this.title = title;
-        
+
         const lines = puzzleText.split("\n");
         const rowNumbers = [];
         const colNumbers = [];
@@ -47,28 +47,11 @@ class Puzzle {
         this.setSize(colNumbers, rowNumbers);
     }
 
-    setMaxNumbers() {
-        this.maxColNumbers = 0;
-        for (const col of this.colNumbers) {
-            if (col.length > this.maxColNumbers) {
-                this.maxColNumbers = col.length;
-            }
-        }
-        this.maxRowNumbers = 0;
-        for (const row of this.rowNumbers) {
-            if (row.length > this.maxRowNumbers) {
-                this.maxRowNumbers = row.length;
-            }
-        }
-
-    }
-
     setSize(colNumbers, rowNumbers) {
         this.width = colNumbers.length;
         this.height = rowNumbers.length;
-        this.colNumbers = colNumbers;
-        this.rowNumbers = rowNumbers;
-        this.setMaxNumbers();
+        this.setColNumbers(colNumbers);
+        this.setRowNumbers(rowNumbers);
 
         this.cells = [];
         for (let row = 0; row < this.height; row++) {
@@ -78,6 +61,28 @@ class Puzzle {
                 rowArray[col] = new Cell(colour);
             }
             this.cells[row] = rowArray;
+        }
+    }
+
+    setColNumbers(colNumbers) {
+        this.colNumbers = colNumbers;
+
+        this.maxColNumbers = 0;
+        for (const col of colNumbers) {
+            if (col.length > this.maxColNumbers) {
+                this.maxColNumbers = col.length;
+            }
+        }
+    }
+
+    setRowNumbers(rowNumbers) {
+        this.rowNumbers = rowNumbers;
+
+        this.maxRowNumbers = 0;
+        for (const row of rowNumbers) {
+            if (row.length > this.maxRowNumbers) {
+                this.maxRowNumbers = row.length;
+            }
         }
     }
 
@@ -207,7 +212,6 @@ class Puzzle {
         this.height = puzzleVariables.rowNumbers.length;
         this.colNumbers = puzzleVariables.ColNumbers;
         this.width = puzzleVariables.colNumbers.length;
-        this.setMaxNumbers();
         this.cells = puzzleVariables.cells;
     }
 

@@ -30,21 +30,31 @@
                     puzzleManager.storePuzzle(title, puz);
                 }
                 getPuzzleList();
+                loadPuzzle(title);
             }
 
             function getPuzzleList() {
                 const container = $('#available-puzzle-list-container .body').html('');
                 for (const title of Object.keys(puzzleManager.puzzles)) {
-                    $('#available-puzzle-list-container .body').append('<li>' + title + '</li>');
+                    $('#available-puzzle-list-container .body').append('<li>' + title + ' <button data-puzzletitle="' + title + '">Delete</button></li>');
                 }
             }
 
             function loadPuzzle(title) {
                 if (puzzleManager.puzzles[title]) {
-                    const gridHTML = puzzleManager.puzzles[title].render();
+                    const puzzle = new Puzzle();
+                    puzzle.unserialize(puzzleManager.puzzles[title]);
+                    const gridHTML = puzzle.render();
                     $('#grid-container').html(gridHTML);
                 }
             }
+
+            $('.delete-puzzle').click(function() {
+                const title = $(this).data('puzzletitle');
+                if (confirm("Are you sure you want to delete " + title)) {
+                    puzzleManager.deletePuzzle(title);
+                }
+            });
         });
     </script>
     <link rel="stylesheet" href="grid.css">
@@ -54,6 +64,7 @@
         <div class="title">Available Puzzles</div>
         <ol class="body"></ol>
     </div>
+    <div>abc</div>
     <div id="grid-container" class="grid-container">
 
     </div>
