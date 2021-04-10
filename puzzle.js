@@ -1,17 +1,3 @@
-class Cell {
-    constructor(defaultColour) {
-        this.colour = defaultColour;
-    }
-
-    setColour(newColour) {
-        this.colour = newColour;
-    }
-
-    getColour() {
-        return this.colour;
-    }
-}
-
 class Puzzle {
     constructor() {
         this.title = '';
@@ -123,7 +109,7 @@ class Puzzle {
             // Actual picture grid
             for(const col in row) {
                 const cell = row[col];
-                const cellClass = cell.getColour();
+                const cellClass = cell;
                 result += '<td class="' + cellClass + '" data-row="' + idx + '" data-col="' + col + '">&nbsp;</td>';
             }
             result += "</tr>\n";
