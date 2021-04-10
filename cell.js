@@ -236,6 +236,6 @@ class Puzzle {
             container.find('td[data-row=' + i + ']').css('border-bottom', '2px solid gray');
         }
     }
-
-
 }
+
+module.exports = [Cell, Puzzle];
