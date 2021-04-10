@@ -3,59 +3,82 @@
     <title>Logic</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <script src="puzzlemanager.js"></script>
     <script src="cell.js"></script>
+    <script src="puzzlemanager.js"></script>
     <script>
         const puzzleManager = new PuzzleManager();
         const grid = new Puzzle();
         const currentCell = { x : -1, y : -1 };
         $(document).ready(function() {
             $('#grid-container').on('mousedown', 'td', function() {
-                grid.leftMouseDown($(this));
+				const cell = $(this);
+				clearColoursFromCell(cell);
+                const newColour = grid.leftMouseDown(cell);
+				cell.addClass('colour-' + newColour);
             });
-            $('#grid-container').on('mousemove', 'td', function() {
-                grid.mouseMove($(this));
+            $('#grid-container').on('mousemove', 'td', function() {	
+				const cell = $(this);
+				clearColoursFromCell(cell);
+                newColour = grid.mouseMove(cell);
+				cell.addClass('colour-' + newColour);
             });
             $('#grid-container').on('mouseup', 'td', function() {
-                grid.mouseUp($(this));
+				const cell = $(this);
+                grid.mouseUp(cell);
             });
 
             $('#start-import').click(importPuzzle);
 
-            function importPuzzle() {
-                const puz = new Puzzle();
-                const title = $('#import-title').val().trim();
-                if (title) {
-                    puz.import(title, $('#import-text').val());
-                    puzzleManager.storePuzzle(title, puz);
-                }
-                getPuzzleList();
-                loadPuzzle(title);
-            }
 
-            function getPuzzleList() {
-                const container = $('#available-puzzle-list-container .body').html('');
-                for (const title of Object.keys(puzzleManager.puzzles)) {
-                    $('#available-puzzle-list-container .body').append('<li>' + title + ' <button data-puzzletitle="' + title + '">Delete</button></li>');
-                }
-            }
-
-            function loadPuzzle(title) {
-                if (puzzleManager.puzzles[title]) {
-                    const puzzle = new Puzzle();
-                    puzzle.unserialize(puzzleManager.puzzles[title]);
-                    const gridHTML = puzzle.render();
-                    $('#grid-container').html(gridHTML);
-                }
-            }
-
-            $('.delete-puzzle').click(function() {
+            $('#available-puzzle-list-container').on('click', '.delete-puzzle', function() {
                 const title = $(this).data('puzzletitle');
                 if (confirm("Are you sure you want to delete " + title)) {
                     puzzleManager.deletePuzzle(title);
+					getPuzzleList();
                 }
             });
+
+            $('#available-puzzle-list-container').on('click', '.load-puzzle', function() {
+                const title = $(this).data('puzzletitle');
+				loadPuzzle(title);
+            });
+			
+			getPuzzleList();
         });
+
+		function clearColoursFromCell(cell) {
+			cell.removeClass(function (index, className) {
+				return (className.match (/(^|\s)color-\S+/g) || []).join(' ');
+			});
+		}
+		
+		function importPuzzle() {
+			const puz = new Puzzle();
+			const title = $('#import-title').val().trim();
+			if (title) {
+				puz.import(title, $('#import-text').val());
+				puzzleManager.storePuzzle(title, puz);
+			}
+			getPuzzleList();
+			loadPuzzle(title);
+		}
+
+		function getPuzzleList() {
+			const container = $('#available-puzzle-list-container .body').html('');
+			for (const title of Object.keys(puzzleManager.puzzles)) {
+				$('#available-puzzle-list-container .body').append('<li>' + title 
+				+ ' <button class="load-puzzle" data-puzzletitle="' + title + '">Load</button></li>'
+				+ ' <button class="delete-puzzle" data-puzzletitle="' + title + '">Delete</button></li>');
+			}
+		}
+
+		function loadPuzzle(title) {
+			if (puzzleManager.puzzles[title]) {
+				grid.unserialize(puzzleManager.puzzles[title]);
+				const gridHTML = grid.render();
+				$('#grid-container').html(gridHTML);
+			}
+		}
     </script>
     <link rel="stylesheet" href="grid.css">
 </head>
@@ -69,7 +92,14 @@
 
     </div>
     <input id="import-title" type="text" />
-    <textarea id="import-text" rows="20" cols="40"></textarea><br />
+    <textarea id="import-text" rows="20" cols="40">1,1,1
+2,2
+6,1,4
+
+2,4,1
+2,3
+3,1
+5,5</textarea><br />
     <button id="start-import" type="button">Import</button>
 </body>
 </html>

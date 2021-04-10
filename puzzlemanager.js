@@ -5,7 +5,7 @@ class PuzzleManager {
     }
 
     /**
-     * Save a single puzzle
+     * Save a single puzzle to the Puzzle List
      *
      * @param {string} title
      * @param {Object} puzzle
@@ -14,6 +14,8 @@ class PuzzleManager {
         if (title) {
             this.puzzles[title] = puzzle.serialize();
         }
+		
+		// Automatically save puzzles to local storage
         this.saveAllPuzzles();
     }
 
@@ -28,7 +30,7 @@ class PuzzleManager {
         }
         window.localStorage.setItem('Puzzles', JSON.stringify(allPuzzles));
     }
-
+	
     /**
      * Get all the Puzzles from local storage into an array
      */
@@ -40,15 +42,15 @@ class PuzzleManager {
             for (const item of puzzleItems) {
                 if (item) {
                     const puz = new Puzzle();
-                    puz.unserialize(item);
-                    this.puzzles[item.title] = puz;
+                    puz.unserialize(JSON.parse(item));
+                    this.puzzles[puz.title] = puz;
                 }
             }
         }
     }
 
     /**
-     * Get a single puzzle
+     * Get a single puzzle from the Puzzle List
      * @param {string} title
      * @returns
      */
@@ -63,9 +65,14 @@ class PuzzleManager {
         return result;
     }
 
+	/**
+	 * Delete a puzzle from the Puzzle List
+	 *
+	 */
     deletePuzzle(title) {
         if (this.puzzles[title]) {
             delete(this.puzzles[title]);
+			this.saveAllPuzzles();
         }
     }
 }
