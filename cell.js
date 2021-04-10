@@ -1,17 +1,3 @@
-class Cell {
-    constructor(defaultColour) {
-        this.colour = defaultColour;
-    }
-
-    setColour(newColour) {
-        this.colour = newColour;
-    }
-
-    getColour() {
-        return this.colour;
-    }
-}
-
 class Puzzle {
     constructor() {
         this.title = '';
@@ -19,6 +5,7 @@ class Puzzle {
         this.rowNumbers = [];
         this.maxRowNumbers;
         this.colNumbers = [];
+		this.snapshots = [];
         this.maxColNumbers;
         this.currentMouseCol = -1;
         this.currentMouseRow = -1;
@@ -55,18 +42,12 @@ class Puzzle {
 
         this.cells = [];
         for (let row = 0; row < this.height; row++) {
-            const rowArray = [];
-            for (let col = 0; col < this.width; col++) {
-                const colour = Math.random() > 0.5 ? 'empty' : 'filled';
-                rowArray[col] = new Cell(colour);
-            }
-            this.cells[row] = rowArray;
+            this.cells[row] = '0'.repeat(this.width);
         }
     }
 
     setColNumbers(colNumbers) {
         this.colNumbers = colNumbers;
-
         this.maxColNumbers = 0;
         for (const col of colNumbers) {
             if (col.length > this.maxColNumbers) {
@@ -108,7 +89,7 @@ class Puzzle {
 
         // Main body
         for(let idx = 0; idx < this.cells.length; idx++) {
-            const row = this.cells[idx];
+            const row = this.cells[idx].split('');
             result += '<tr>';
 
             // Side numbers
@@ -123,8 +104,10 @@ class Puzzle {
             // Actual picture grid
             for(const col in row) {
                 const cell = row[col];
-                const cellClass = cell.getColour();
-                result += '<td class="' + cellClass + '" data-row="' + idx + '" data-col="' + col + '">&nbsp;</td>';
+                const cellClass = "colour-" + cell;
+                result += '<td class="' + cellClass + '" '
+					+ 'data-row="' + (parseInt(idx) + parseInt(this.maxColNumbers)) + '" '
+					+ 'data-col="' + (parseInt(col) + parseInt(this.maxRowNumbers)) + '">&nbsp;</td>';
             }
             result += "</tr>\n";
         }
@@ -135,7 +118,7 @@ class Puzzle {
 
 
     getCell(row, col) {
-        return this.cells[row][col];
+        return this.cells[row - this.maxColNumbers].charAt(col - this.maxRowNumbers);
     }
 
     getCellFromMouseClick(node) {
@@ -144,33 +127,40 @@ class Puzzle {
 
         return this.getCell(row, col);
     }
-
+	
+	/**
+	 * Handle the mouse button being pushed down (not necessarily coming up
+	 *
+	 */
     leftMouseDown(node) {
-        const cell = this.getCellFromMouseClick(node);
-
+        const cellColour = this.getCellFromMouseClick(node);
+		const newCellColour = (cellColour == '0') ? '1' : '0';
+		
         this.currentMouseCol = node.data('col');
         this.currentMouseRow = node.data('row');
-        if (cell.getColour() == 'empty') {
-            node.removeClass(cell.getColour());
-            cell.setColour('filled');
-            node.addClass(cell.getColour());
-        } else {
-            node.removeClass(cell.getColour());
-            cell.setColour('empty');
-            node.removeClass(cell.getColour());
-        }
-        this.currentPaintColour = cell.getColour();
+        
+		const row = this.cells[this.currentMouseRow].split('');
+		row[this.currentMouseCol] = newCellColour;
+		this.cells[this.currentMouseRow] = row.join('');
+        this.currentPaintColour = newCellColour;
+		return newCellColour;
     }
 
+	/**
+	 * Handle a mouse movement
+	 * (should move to the UI level)
+	 */
     mouseMove(node) {
         const mouseRow = node.data('row');
         const mouseCol = node.data('col');
 
-
+		// If we are painting, then we may have to do something, otherwise not
         if (this.currentPaintColour) {
             const dx = mouseCol != this.currentMouseCol;
             const dy = mouseRow != this.currentMouseRow;
 
+			// If a paint direction isn't set, then set one. This ensures that when you are painting a row or column,
+			// you can only continue to paint in that row or column
             if (!this.currentPaintDirection) {
                 if (dx) {
                     this.currentPaintDirection = 'h';
@@ -181,23 +171,24 @@ class Puzzle {
                 }
             }
 
+			// We are painting, and are moving in the correct direction (horizontal or vertical) to allow painting
             if ((this.currentPaintDirection == 'h' && this.currentPaintRow == mouseRow && dx)
               || (this.currentPaintDirection == 'v' && this.currentPaintCol == mouseCol && dy)) {
                 // We have moved to a new cell in the current Row or Col
-                const cell = this.getCellFromMouseClick(node);
-                const origColour = cell.getColour();
-                if (origColour != this.currentPaintColour) {
-                    cell.setColour(this.currentPaintColour);
-                    node.removeClass(origColour);
-                    node.addClass(this.currentPaintColour);
-                }
+				const row = this.cells[mouseRow].split('');
+				row[mouseCol] = this.currentPaintColour;
+				this.cells[this.mouseRow] = row.join('');
             }
         }
         this.currentMouseRow = mouseRow;
         this.currentMouseCol = mouseCol;
-
+		return this.currentPaintColour;
     }
 
+	/**
+	 * Handle a mouse button being returned to the "up" position
+	 * (should move to the UI level)
+	 */
     mouseUp(node) {
         this.currentPaintColour = null;
         this.currentPaintDirection = null;
@@ -205,29 +196,63 @@ class Puzzle {
         this.currentPaintRow = null;
     }
 
-    unserialize(puzzleData) {
-        const puzzleVariables = JSON.parse(puzzleData);
+	/**
+	 * Fill the members of this object from a string (or from an array that has already been serialized)
+	 *
+	 */
+    unserialize(puzzleVariables) {
         this.title = puzzleVariables.title;
         this.rowNumbers = puzzleVariables.rowNumbers;
+		this.maxRowNumbers = puzzleVariables.maxRowNumbers;
         this.height = puzzleVariables.rowNumbers.length;
-        this.colNumbers = puzzleVariables.ColNumbers;
+        this.colNumbers = puzzleVariables.colNumbers;
+		this.maxColNumbers = puzzleVariables.maxColNumbers;
         this.width = puzzleVariables.colNumbers.length;
         this.cells = puzzleVariables.cells;
     }
 
+	/**
+	 * Convert this object into a string
+	 *
+	 */
     serialize() {
         const puzzle = {
             title : this.title,
             width : this.width,
             height : this.height,
             rowNumbers : this.rowNumbers,
+			maxRowNumbers : this.maxRowNumbers,
             colNumbers : this.colNumbers,
-            cells : this.cells
+			maxColNumbers : this.maxColNumbers
         };
+		
+		puzzle.cells = this.getCellColours();
 
         return JSON.stringify(puzzle);
     }
+	
+	/**
+	 * Get all the cell colours for this puzzle
+	 * (each row is a string, like "1100000010010010")
+	 
+	 */
+	getCellColours() {
+		return this.cells;
+	}
+	
+	/**
+	 * Given a set of cell colours, copy them into the cells of this Puzzle
+	 *
+	 */
+	setCellColours(cells) {
+		this.cells = cells;
+	}
 
+	/**
+	 * Add gray lines every 5 cells
+	 * (this should be moved to the interface level)
+	 *
+	 */
     drawLines(container) {
         for (let i = 4; i < this.width; i+= 5) {
             container.find('td[data-col=' + i + ']').css('border-right', '2px solid gray');
@@ -236,6 +261,26 @@ class Puzzle {
             container.find('td[data-row=' + i + ']').css('border-bottom', '2px solid gray');
         }
     }
+	
+	/**
+	 * Get the current state of this Puzzle's cells and add them to the snapshots array
+	 *
+	 */
+	takeSnapshot() {
+		const snapshotDate = new Date();
+		this.snapshots.push({
+			title : snapshotDate.toLocaleString(),
+			cells : this.getCellColours()
+		});
+	}
+	
+	/**
+	 * Delete a snapshot from this Puzzle's list of snapshots
+	 *
+	 */
+	deleteSnapshot(idx) {
+		delete(this.snapshots[idx]);
+	}
 
 
 }

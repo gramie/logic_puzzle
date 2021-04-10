@@ -15,12 +15,12 @@
     border: 1px solid silver;
 }
 
-#grid-container td.filled {
-    background-color: black;
+#grid-container td.colour-0 {
+    background-color: white;
 }
 
-#grid-container td.empty {
-    background-color: white;
+#grid-container td.colour-1 {
+    background-color: black;
 }
 
 #grid-container tr {
